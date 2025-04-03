@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>道具合成計算器</title>
+    <style>
+        body {
+            font-family: 'Noto Sans CJK TC', sans-serif;
+            background-color: #f8f8f8;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            text-align: left;
+        }
+        .input-group, .result-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            justify-content: center;
+        }
+        .input-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        input {
+            width: 60px;
+            text-align: center;
+            margin-left: 10px;
+        }
+        button {
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            background: #ff8c8c;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #ff5c5c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>道具合成計算器</h2>
+        <div class="input-group" id="inputs"></div>
+        <button onclick="calculate()">計算</button>
+        <h3>結果：</h3>
+        <p><strong>製作最高數量為：<span id="totalResult">0</span></strong></p>
+        <div class="result-group" id="results"></div>
+    </div>
+
+    <script>
+        const items = [
+            "穀物", "蔬菜&水果", "肉", "海鮮", "牛奶", "雞蛋", "香菇", "辛香料", "時空麵粉", "紅色果汁", 
+            "藍色果汁", "紅色橙皮", "藍色橙皮", "時空蜜酒", "遺忘時空麵粉", "橘色果汁", "綠色果汁", 
+            "橘色橙皮", "綠色橙皮", "遺忘時空蜜酒", "海洋時空奶油", "海洋時空醋", "淺黃古代食鹽", 
+            "淡紫古代食鹽", "淺黃魚餡", "淡紫魚餡", "香草味牛奶", "食用心之星粉末", "瑪莎的特製明膠"
+        ];
+
+        const recipes = {
+            "熱騰騰的鯽魚餅": { "穀物": 1, "雞蛋": 1 },
+            "清香蘋果茶": { "蔬菜&水果": 1, "牛奶": 1 },
+            "令人沉迷的布丁": { "雞蛋": 1, "蔬菜&水果": 1, "牛奶": 1 },
+            "軟綿綿的鬆餅": { "香菇": 1, "穀物": 2, "雞蛋": 2 },
+            "桃子味牛奶": { "雞蛋": 1, "蔬菜&水果": 1, "牛奶": 1 },
+            "南國奶昔": { "辛香料": 1, "蔬菜&水果": 2, "牛奶": 2 },
+            "紅色果酒": { "紅色橙皮": 3, "時空蜜酒": 3 },
+            "藍色果酒": { "藍色橙皮": 3, "時空蜜酒": 3 },
+            "紅色涼糕": { "紅色果汁": 3, "時空麵粉": 3 },
+            "藍色涼糕": { "藍色果汁": 3, "時空麵粉": 3 },
+            "淺黃色波斯卡": { "淺黃古代食鹽": 3, "海洋時空醋": 3 },
+            "淡紫色波斯卡": { "淡紫古代食鹽": 3, "海洋時空醋": 3 },
+            "淺黃色肉醬": { "淺黃魚餡": 3, "海洋時空奶油": 3 },
+            "淡紫色肉醬": { "淡紫魚餡": 3, "海洋時空奶油": 3 }
+        };
+
+        function loadInputs() {
+            const inputContainer = document.getElementById("inputs");
+            inputContainer.innerHTML = "";
+            items.forEach(item => {
+                const label = document.createElement("label");
+                label.innerHTML = `${item} <input type="number" id="${item}" min="0" value="0">`;
+                inputContainer.appendChild(label);
+            });
+        }
+
+        function calculate() {
+            let availableItems = {};
+            items.forEach(item => {
+                availableItems[item] = parseInt(document.getElementById(item).value) || 0;
+            });
+            
+            let results = {};
+            for (let product in recipes) {
+                let canMake = Infinity;
+                for (let ingredient in recipes[product]) {
+                    if (availableItems[ingredient] < recipes[product][ingredient]) {
+                        canMake = 0;
+                        break;
+                    }
+                    canMake = Math.min(canMake, Math.floor(availableItems[ingredient] / recipes[product][ingredient]));
+                }
+                results[product] = canMake;
+            }
+            
+            document.getElementById("totalResult").textContent = Object.values(results).reduce((sum, val) => sum + val, 0);
+            
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = "";
+            for (let product in results) {
+                const resultItem = document.createElement("p");
+                resultItem.textContent = `${product}: ${results[product]}`;
+                resultsContainer.appendChild(resultItem);
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", loadInputs);
+    </script>
+</body>
+</html>
